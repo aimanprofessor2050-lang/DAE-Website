@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAE - လုပ်ငန်းစဉ်အသေးစိတ်</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'Noto Sans Myanmar', sans-serif !important; }
+        .text-justify { text-align: justify; }
+        .gallery-img { cursor: pointer; transition: all 0.3s; }
+        .gallery-img:hover { transform: scale(1.05); }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { position: relative; max-width: 90%; max-height: 90%; }
+        .modal-content img { max-width: 100%; max-height: 100%; }
+        .close-modal { position: absolute; top: -40px; right: 0; color: white; font-size: 30px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white shadow-lg border-b-2 border-sky-600">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='index.html'">
+                <div class="w-10 h-10 bg-sky-600 rounded-xl flex items-center justify-center text-white font-black">DAE</div>
+                <span class="font-black text-slate-800 hidden md:inline">DAE Myanmar</span>
+            </div>
+            <div class="flex space-x-6 text-sm font-bold items-center">
+                <a href="index.html" class="text-slate-600 hover:text-sky-600">ပင်မစာမျက်နှာ</a>
+                <a href="news.html" class="text-slate-600 hover:text-sky-600">သတင်းများ</a>
+                <a href="index.html#programs" class="text-slate-600 hover:text-sky-600">လုပ်ငန်းစဉ်များ</a>
+                <a href="Admin_CMS_v5_Fixed.html" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700">Admin</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Program Header -->
+    <div id="programHeader" class="bg-gradient-to-r from-sky-600 to-sky-700 text-white py-16">
+        <div class="max-w-6xl mx-auto px-4">
+            <a href="index.html#programs" class="text-sky-100 hover:text-white mb-4 inline-block text-sm font-bold">← လုပ်ငန်းစဉ်များသို့ ပြန်သွားမည်</a>
+            <h1 id="programTitle" class="text-4xl font-black mb-2">လုပ်ငန်းစဉ်အမည်</h1>
+            <p id="programSubtitle" class="text-lg opacity-90">အသေးစိတ်ဖတ်ရှုရန်</p>
+        </div>
+    </div>
+
+    <!-- Program Content -->
+    <div class="max-w-6xl mx-auto px-4 py-16">
+        <!-- Description Section -->
+        <div class="bg-white p-8 rounded-3xl shadow-lg mb-12 border border-slate-100">
+            <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center"><span class="w-2 h-8 bg-sky-600 rounded mr-3"></span>အဓိပ္ပာယ်ဖွင့်ဆိုချက်နှင့် ဆောင်ရွက်မှုများ</h2>
+            <div id="programDesc" class="text-slate-700 leading-relaxed text-justify whitespace-pre-wrap"></div>
+        </div>
+
+        <!-- Gallery Section -->
+        <div>
+            <h2 class="text-2xl font-black text-slate-800 mb-8 flex items-center"><span class="w-2 h-8 bg-sky-600 rounded mr-3"></span>မှတ်တမ်းဓာတ်ပုံများ (Gallery)</h2>
+            <div id="galleryContainer" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Dynamically loaded images -->
+                <div class="animate-pulse bg-slate-200 h-48 rounded-2xl"></div>
+                <div class="animate-pulse bg-slate-200 h-48 rounded-2xl"></div>
+                <div class="animate-pulse bg-slate-200 h-48 rounded-2xl"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <img id="modalImg" src="" alt="Full Image">
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyBoEpxAm2L_AeG8BkqUd-bMawj6-SNqt3Q", authDomain: "dae-web-portal.firebaseapp.com", projectId: "dae-web-portal", storageBucket: "dae-web-portal.firebasestorage.app", messagingSenderId: "675669637539", appId: "1:675669637539:web:5ad6d6dd5b990cbee18216" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type') || 'literacy';
+
+        const titles = {
+            'literacy': 'Literacy (စာတတ်မြောက်ရေး)',
+            'nfpe': 'NFPE (ကျောင်းပြင်ပမူလတန်းပညာရေး)',
+            'nfme': 'NFME (ကျောင်းပြင်ပအလယ်တန်းပညာရေး)',
+            'ce': 'CE (စဉ်ဆက်ပညာရေး)'
+        };
+
+        document.getElementById('programTitle').innerText = titles[type] || 'လုပ်ငန်းစဉ်';
+
+        async function loadProgram() {
+            const snap = await getDoc(doc(db, "programs", type));
+            if (snap.exists()) {
+                const data = snap.data();
+                document.getElementById('programDesc').innerText = data.description || "အချက်အလက်များ မရှိသေးပါ။";
+                
+                const gallery = document.getElementById('galleryContainer');
+                gallery.innerHTML = "";
+                if (data.images && data.images.length > 0) {
+                    data.images.forEach(url => {
+                        const div = document.createElement('div');
+                        div.className = "gallery-img rounded-2xl overflow-hidden shadow-md h-48";
+                        div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" onclick="openModal('${url}')">`;
+                        gallery.appendChild(div);
+                    });
+                } else {
+                    gallery.innerHTML = '<p class="col-span-full text-slate-400">မှတ်တမ်းဓာတ်ပုံများ မရှိသေးပါ။</p>';
+                }
+            }
+        }
+
+        window.openModal = (url) => {
+            document.getElementById('modalImg').src = url;
+            document.getElementById('imageModal').classList.add('show');
+        };
+
+        window.closeModal = () => {
+            document.getElementById('imageModal').classList.remove('show');
+        };
+
+        loadProgram();
+    </script>
+</body>
+</html>
