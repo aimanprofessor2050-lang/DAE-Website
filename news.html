@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAE - သတင်းများ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'Noto Sans Myanmar', sans-serif !important; }
+        .text-justify { text-align: justify; }
+        .nav-link:hover::after { width: 100%; left: 0; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -2px; left: 50%; background: #0284c7; transition: all 0.3s; }
+        .page-btn.active { background-color: #0284c7; color: white; }
+        .news-card { transition: all 0.3s; }
+        .news-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .archive-btn { transition: all 0.2s; }
+        .archive-btn.active { background-color: #0284c7; color: white; }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50 border-b-2 border-sky-600">
+        <div class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2 group cursor-pointer" onclick="window.location.href='index.html'">
+                <div class="w-9 h-9 bg-sky-600 rounded text-white flex items-center justify-center font-black group-hover:rotate-12 transition-transform">DAE</div>
+                <span class="text-sky-950 font-black text-lg uppercase tracking-tighter">DAE Myanmar</span>
+            </div>
+            <div class="hidden md:flex space-x-8 text-sky-900 font-bold text-sm items-center">
+                <a href="index.html" class="relative nav-link">ပင်မစာမျက်နှာ</a>
+                <a href="news.html" class="relative nav-link text-sky-600">သတင်းများ</a>
+                <a href="index.html#programs" class="relative nav-link">လုပ်ငန်းစဉ်များ</a>
+                <a href="index.html#contact" class="relative nav-link">ဆက်သွယ်ရန်</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-sky-600 py-12 text-center text-white">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl font-black mb-2 uppercase">သတင်းများ</h1>
+            <p class="text-xs font-bold opacity-80 tracking-widest uppercase">Latest Updates & News</p>
+        </div>
+    </header>
+
+    <!-- News List with Archive -->
+    <section class="py-16 container mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Sidebar: Monthly Archive -->
+            <aside class="lg:col-span-1">
+                <div class="bg-white p-6 rounded-2xl shadow-md sticky top-20">
+                    <h3 class="text-lg font-black text-slate-800 mb-6 border-b-2 border-sky-600 pb-3">လအလိုက် မှတ်တမ်း</h3>
+                    <div id="archiveList" class="space-y-2">
+                        <!-- Archive months will be generated here -->
+                    </div>
+                    <button onclick="showAllNews()" class="w-full mt-6 px-4 py-2 bg-sky-600 text-white font-bold rounded-lg hover:bg-sky-700 transition text-sm">အားလုံးပြန်ပြသမည်</button>
+                </div>
+            </aside>
+            
+            <!-- Main Content: News Grid -->
+            <div class="lg:col-span-3">
+                <div id="allNewsGrid" class="grid md:grid-cols-2 gap-8">
+                    <!-- Loading -->
+                    <div class="animate-pulse bg-slate-200 h-64 rounded-2xl"></div>
+                    <div class="animate-pulse bg-slate-200 h-64 rounded-2xl"></div>
+                    <div class="animate-pulse bg-slate-200 h-64 rounded-2xl"></div>
+                </div>
+
+                <!-- Pagination -->
+                <div id="pagination" class="mt-16 flex justify-center space-x-2">
+                    <!-- Page Buttons -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        
+        const firebaseConfig = { apiKey: "AIzaSyBoEpxAm2L_AeG8BkqUd-bMawj6-SNqt3Q", authDomain: "dae-web-portal.firebaseapp.com", projectId: "dae-web-portal", storageBucket: "dae-web-portal.firebasestorage.app", messagingSenderId: "675669637539", appId: "1:675669637539:web:5ad6d6dd5b990cbee18216" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const ITEMS_PER_PAGE = 10;
+        let allNews = [];
+        let currentPage = 1;
+        let filteredNews = [];
+        let monthlyArchive = {};
+
+        async function loadNews() {
+            const snap = await getDocs(query(collection(db, "news"), orderBy("createdAt", "desc")));
+            allNews = [];
+            monthlyArchive = {};
+            
+            snap.forEach(d => {
+                const data = d.data();
+                allNews.push({ id: d.id, ...data });
+                
+                // Group by month
+                if (data.date) {
+                    const monthKey = data.date.substring(0, 7); // Extract "YYYY-MM" format or similar
+                    if (!monthlyArchive[monthKey]) {
+                        monthlyArchive[monthKey] = [];
+                    }
+                    monthlyArchive[monthKey].push({ id: d.id, ...data });
+                }
+            });
+            
+            filteredNews = allNews;
+            renderArchive();
+            renderPage(1);
+        }
+
+        function renderArchive() {
+            const archiveContainer = document.getElementById('archiveList');
+            archiveContainer.innerHTML = '';
+            
+            // Get unique months and sort them
+            const months = Object.keys(monthlyArchive).sort().reverse();
+            
+            months.forEach(month => {
+                const count = monthlyArchive[month].length;
+                const btn = document.createElement('button');
+                btn.className = 'archive-btn w-full text-left px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-sky-600 hover:text-white font-bold text-sm transition';
+                btn.innerText = `${month} (${count})`;
+                btn.onclick = () => filterByMonth(month, btn);
+                archiveContainer.appendChild(btn);
+            });
+        }
+
+        window.filterByMonth = (month, btn) => {
+            // Remove active class from all buttons
+            document.querySelectorAll('.archive-btn').forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
+            btn.classList.add('active');
+            
+            filteredNews = monthlyArchive[month] || [];
+            renderPage(1);
+        };
+
+        window.showAllNews = () => {
+            document.querySelectorAll('.archive-btn').forEach(b => b.classList.remove('active'));
+            filteredNews = allNews;
+            renderPage(1);
+        };
+
+        window.renderPage = (page) => {
+            currentPage = page;
+            const grid = document.getElementById('allNewsGrid');
+            grid.innerHTML = "";
+            
+            const start = (page - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const pageNews = filteredNews.slice(start, end);
+
+            if (pageNews.length === 0) {
+                grid.innerHTML = '<p class="col-span-2 text-center text-slate-400 py-10">သတင်းများ မရှိသေးပါ။</p>';
+                return;
+            }
+
+            pageNews.forEach(data => {
+                grid.innerHTML += `
+                    <div class="news-card bg-white rounded-3xl overflow-hidden shadow-md border border-slate-100 flex flex-col h-full hover:shadow-xl transition group">
+                        <img src="${data.image}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
+                        <div class="p-6 flex-grow flex flex-col">
+                            <p class="text-sky-600 font-bold text-[10px] mb-2 uppercase tracking-tighter">${data.date || 'သတင်း'}</p>
+                            <h4 class="text-lg font-black text-slate-800 mb-3 line-clamp-2">${data.title}</h4>
+                            <p class="text-slate-500 text-xs line-clamp-3 mb-6 leading-relaxed text-justify">${data.description}</p>
+                            <div class="mt-auto">
+                                <a href="news-detail.html?id=${data.id}" class="text-sky-600 text-xs font-black hover:underline">အသေးစိတ်ဖတ်ရန် →</a>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            renderPagination();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredNews.length / ITEMS_PER_PAGE);
+            const container = document.getElementById('pagination');
+            container.innerHTML = "";
+            
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i;
+                btn.className = `page-btn px-4 py-2 rounded-lg border border-slate-200 font-bold text-sm shadow-sm transition ${i === currentPage ? 'active' : 'bg-white text-slate-600 hover:bg-slate-50'}`;
+                btn.onclick = () => renderPage(i);
+                container.appendChild(btn);
+            }
+        }
+
+        loadNews();
+    </script>
+</body>
+</html>
