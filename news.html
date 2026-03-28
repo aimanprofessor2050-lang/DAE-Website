@@ -77,6 +77,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot, getDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         
         const firebaseConfig = { apiKey: "AIzaSyBoEpxAm2L_AeG8BkqUd-bMawj6-SNqt3Q", authDomain: "dae-web-portal.firebaseapp.com", projectId: "dae-web-portal", storageBucket: "dae-web-portal.firebasestorage.app", messagingSenderId: "675669637539", appId: "1:675669637539:web:5ad6d6dd5b990cbee18216" };
@@ -194,6 +195,16 @@
                 container.appendChild(btn);
             }
         }
+
+        getDoc(doc(db, "settings", "social")).then(snap => {
+            if(snap.exists()){
+                const d = snap.data();
+                if(d.facebook) document.getElementById("fb-link").href = d.facebook;
+                if(d.telegram) document.getElementById("tg-link").href = d.telegram;
+                if(d.tiktok) document.getElementById("tt-link").href = d.tiktok;
+                if(d.youtube) document.getElementById("yt-link").href = d.youtube;
+            }
+        });
 
         loadNews();
     </script>

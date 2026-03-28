@@ -9,12 +9,12 @@
     <style>
         * { font-family: 'Noto Sans Myanmar', sans-serif !important; }
         .text-justify { text-align: justify; }
-        .gallery-img { cursor: pointer; transition: all 0.3s; }
-        .gallery-img:hover { transform: scale(1.05); }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        .gallery-img { cursor: pointer; transition: all 0.3s; border-radius: 12px; }
+        .gallery-img:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 1000; align-items: center; justify-content: center; }
         .modal.show { display: flex; }
         .modal-content { position: relative; max-width: 90%; max-height: 90%; }
-        .modal-content img { max-width: 100%; max-height: 100%; }
+        .modal-content img { max-width: 100%; max-height: 100%; border-radius: 12px; }
         .close-modal { position: absolute; top: -40px; right: 0; color: white; font-size: 30px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
@@ -30,8 +30,8 @@
             <div class="flex space-x-6 text-sm font-bold items-center">
                 <a href="index.html" class="text-slate-600 hover:text-sky-600">ပင်မစာမျက်နှာ</a>
                 <a href="news.html" class="text-slate-600 hover:text-sky-600">သတင်းများ</a>
-                <a href="index.html#programs" class="text-slate-600 hover:text-sky-600">လုပ်ငန်းစဉ်များ</a>
-                <a href="Admin_CMS_v5_Fixed.html" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700">Admin</a>
+                <a href="programs.html" class="text-slate-600 hover:text-sky-600">လုပ်ငန်းစဉ်များ</a>
+                <a href="Admin_CMS_v6_Full.html" class="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700">Admin</a>
             </div>
         </div>
     </nav>
@@ -39,7 +39,7 @@
     <!-- Program Header -->
     <div id="programHeader" class="bg-gradient-to-r from-sky-600 to-sky-700 text-white py-16">
         <div class="max-w-6xl mx-auto px-4">
-            <a href="index.html#programs" class="text-sky-100 hover:text-white mb-4 inline-block text-sm font-bold">← လုပ်ငန်းစဉ်များသို့ ပြန်သွားမည်</a>
+            <a href="programs.html" class="text-sky-100 hover:text-white mb-4 inline-block text-sm font-bold">← လုပ်ငန်းစဉ်များသို့ ပြန်သွားမည်</a>
             <h1 id="programTitle" class="text-4xl font-black mb-2">လုပ်ငန်းစဉ်အမည်</h1>
             <p id="programSubtitle" class="text-lg opacity-90">အသေးစိတ်ဖတ်ရှုရန်</p>
         </div>
@@ -48,30 +48,45 @@
     <!-- Program Content -->
     <div class="max-w-6xl mx-auto px-4 py-16">
         <!-- Description Section -->
-        <div class="bg-white p-8 rounded-3xl shadow-lg mb-12 border border-slate-100">
-            <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center"><span class="w-2 h-8 bg-sky-600 rounded mr-3"></span>အဓိပ္ပာယ်ဖွင့်ဆိုချက်နှင့် ဆောင်ရွက်မှုများ</h2>
-            <div id="programDesc" class="text-slate-700 leading-relaxed text-justify whitespace-pre-wrap"></div>
+        <div class="bg-white p-8 rounded-2xl shadow-lg mb-12 border-l-4 border-sky-600">
+            <h2 class="text-2xl font-black text-slate-800 mb-4">အကျဉ်းချုပ်</h2>
+            <p id="programDesc" class="text-slate-600 text-justify leading-relaxed">အချက်အလက် ရှာဖွေနေပါသည်...</p>
+        </div>
+
+        <!-- Detail Section -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg mb-12 border-l-4 border-indigo-600">
+            <h2 class="text-2xl font-black text-slate-800 mb-4">အသေးစိတ်အချက်အလက်</h2>
+            <p id="programDetail" class="text-slate-600 text-justify leading-relaxed">အချက်အလက် ရှာဖွေနေပါသည်...</p>
         </div>
 
         <!-- Gallery Section -->
-        <div>
-            <h2 class="text-2xl font-black text-slate-800 mb-8 flex items-center"><span class="w-2 h-8 bg-sky-600 rounded mr-3"></span>မှတ်တမ်းဓာတ်ပုံများ (Gallery)</h2>
-            <div id="galleryContainer" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <!-- Dynamically loaded images -->
-                <div class="animate-pulse bg-slate-200 h-48 rounded-2xl"></div>
-                <div class="animate-pulse bg-slate-200 h-48 rounded-2xl"></div>
-                <div class="animate-pulse bg-slate-200 h-48 rounded-2xl"></div>
+        <div class="bg-white p-8 rounded-2xl shadow-lg border-l-4 border-emerald-600">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">မှတ်တမ်းဓာတ်ပုံများ</h2>
+            <div id="galleryContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="text-center text-slate-500 col-span-full py-12">ဓာတ်ပုံများ ရှာဖွေနေပါသည်...</div>
             </div>
         </div>
     </div>
 
     <!-- Image Modal -->
-    <div id="imageModal" class="modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <img id="modalImg" src="" alt="Full Image">
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">✕</span>
+            <img id="modalImage" src="" alt="">
         </div>
     </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-white py-12 text-center border-t-4 border-sky-600 mt-20">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-center space-x-8 mb-8">
+                <a href="javascript:void(0)" id="fb-link" target="_blank" class="text-slate-400 hover:text-blue-500 transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+                <a href="javascript:void(0)" id="tg-link" target="_blank" class="text-slate-400 hover:text-sky-400 transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.717-.962 4.084-1.362 5.441-.168.57-.504.762-.714.781-.456.043-.801-.299-1.242-.588-.69-.451-1.079-.731-1.751-1.173-.776-.51-.273-.79.169-1.25.116-.121 2.128-1.954 2.167-2.121.005-.021.005-.1-.056-.154-.061-.054-.15-.035-.214-.021-.091.02-1.542.978-4.352 2.873-.411.282-.784.421-1.118.414-.368-.008-1.077-.208-1.604-.379-.647-.21-1.164-.321-1.119-.678.023-.186.279-.377.766-.573 2.997-1.303 4.995-2.164 5.993-2.582 2.846-1.189 3.437-1.396 3.821-1.403.085-.002.273.019.395.117.103.083.132.195.143.274.012.088.025.281.014.436z"/></svg></a>
+                <a href="javascript:void(0)" id="tt-link" target="_blank" class="text-slate-400 hover:text-pink-500 transition"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.01 1.62 4.14.81.93 1.88 1.6 3.06 1.95v4.06c-1.12-.12-2.23-.49-3.21-1.07-.86-.51-1.61-1.19-2.19-2.01v8.83c.02 2.73-1.42 5.34-3.83 6.63-2.6 1.39-5.91 1.05-8.14-1.04-2.23-2.09-2.67-5.46-1.16-8.08 1.4-2.43 4.36-3.7 7.13-3.15v4.13c-1.31-.38-2.77-.07-3.78.89-.98.92-1.28 2.37-.8 3.65.51 1.32 1.95 2.11 3.33 1.95 1.45-.16 2.53-1.45 2.47-2.9v-13.84z"/></svg></a>
+            </div>
+            <p class="text-[10px] opacity-40 uppercase tracking-widest">© 2026 Department of Alternative Education (DAE)</p>
+        </div>
+    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -81,41 +96,47 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type') || 'literacy';
-
-        const titles = {
-            'literacy': 'Literacy (စာတတ်မြောက်ရေး)',
-            'nfpe': 'NFPE (ကျောင်းပြင်ပမူလတန်းပညာရေး)',
-            'nfme': 'NFME (ကျောင်းပြင်ပအလယ်တန်းပညာရေး)',
-            'ce': 'CE (စဉ်ဆက်ပညာရေး)'
+        const typeNames = {
+            literacy: 'Literacy - စာတတ်မြောက်ရေး',
+            nfpe: 'NFPE - ကျောင်းပြင်ပမူလတန်းပညာရေး',
+            nfme: 'NFME - ကျောင်းပြင်ပအလယ်တန်းပညာရေး',
+            ce: 'CE - စဉ်ဆက်ပညာရေး'
         };
 
-        document.getElementById('programTitle').innerText = titles[type] || 'လုပ်ငန်းစဉ်';
+        const urlParams = new URLSearchParams(window.location.search);
+        const programType = urlParams.get('type') || 'literacy';
 
-        async function loadProgram() {
-            const snap = await getDoc(doc(db, "programs", type));
-            if (snap.exists()) {
-                const data = snap.data();
-                document.getElementById('programDesc').innerText = data.description || "အချက်အလက်များ မရှိသေးပါ။";
-                
-                const gallery = document.getElementById('galleryContainer');
-                gallery.innerHTML = "";
-                if (data.images && data.images.length > 0) {
-                    data.images.forEach(url => {
-                        const div = document.createElement('div');
-                        div.className = "gallery-img rounded-2xl overflow-hidden shadow-md h-48";
-                        div.innerHTML = `<img src="${url}" class="w-full h-full object-cover" onclick="openModal('${url}')">`;
-                        gallery.appendChild(div);
-                    });
+        const loadProgramContent = async () => {
+            try {
+                const docSnap = await getDoc(doc(db, 'programs', programType));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('programTitle').textContent = typeNames[programType] || programType;
+                    document.getElementById('programSubtitle').textContent = data.desc || 'အသေးစိတ်ဖတ်ရှုရန်';
+                    document.getElementById('programDesc').textContent = data.desc || 'အချက်အလက်မရှိသေးပါ';
+                    document.getElementById('programDetail').textContent = data.detail || 'အသေးစိတ်အချက်အလက်မရှိသေးပါ';
+
+                    const gallery = document.getElementById('galleryContainer');
+                    if (data.images && data.images.length > 0) {
+                        gallery.innerHTML = data.images.map(img => `
+                            <div class="overflow-hidden rounded-lg shadow-md">
+                                <img src="${img}" alt="မှတ်တမ်းဓာတ်ပုံ" class="gallery-img w-full h-64 object-cover" onclick="openModal('${img}')">
+                            </div>
+                        `).join('');
+                    } else {
+                        gallery.innerHTML = '<div class="text-center text-slate-500 col-span-full py-12">မှတ်တမ်းဓာတ်ပုံများမရှိသေးပါ</div>';
+                    }
                 } else {
-                    gallery.innerHTML = '<p class="col-span-full text-slate-400">မှတ်တမ်းဓာတ်ပုံများ မရှိသေးပါ။</p>';
+                    document.getElementById('programDesc').textContent = 'လုပ်ငန်းစဉ်အချက်အလက်မရှိသေးပါ။ Admin Panel မှတစ်ဆင့် ထည့်သွင်းပေးပါ။';
                 }
+            } catch (error) {
+                console.error('Error loading program:', error);
+                document.getElementById('programDesc').textContent = 'အချက်အလက် ရှာဖွေရာတွင် အမှားအယွင်းရှိပါသည်';
             }
-        }
+        };
 
-        window.openModal = (url) => {
-            document.getElementById('modalImg').src = url;
+        window.openModal = (imageSrc) => {
+            document.getElementById('modalImage').src = imageSrc;
             document.getElementById('imageModal').classList.add('show');
         };
 
@@ -123,7 +144,24 @@
             document.getElementById('imageModal').classList.remove('show');
         };
 
-        loadProgram();
+        // Load social links
+        const loadSocialLinks = async () => {
+            try {
+                const docSnap = await getDoc(doc(db, 'settings', 'social'));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.facebook) document.getElementById('fb-link').href = data.facebook;
+                    if (data.telegram) document.getElementById('tg-link').href = data.telegram;
+                    if (data.tiktok) document.getElementById('tt-link').href = data.tiktok;
+                }
+            } catch (error) {
+                console.error('Error loading social links:', error);
+            }
+        };
+
+        // Initialize
+        loadProgramContent();
+        loadSocialLinks();
     </script>
 </body>
 </html>

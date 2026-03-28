@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAE Admin CMS - Full Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { font-family: 'Noto Sans Myanmar', sans-serif !important; }
+        .tab-btn.active { background-color: #0284c7; color: white; border-color: #0284c7; }
+        .image-preview { position: relative; width: 80px; height: 80px; border-radius: 12px; overflow: hidden; border: 2px solid #f1f5f9; }
+        .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .remove-img { position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.9); color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .progress-bar { height: 10px; background: #f1f5f9; border-radius: 20px; overflow: hidden; margin-top: 15px; display: none; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #0ea5e9, #0284c7); width: 0%; transition: width 0.4s ease; }
+        .status-msg { font-size: 13px; font-weight: bold; margin-top: 8px; text-align: center; }
+        .success-text { color: #059669; }
+        .error-text { color: #dc2626; }
+        .info-text { color: #0284c7; }
+        .item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; transition: all 0.2s; }
+        .item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #cbd5e1; }
+        .action-btn { font-size: 11px; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: all 0.2s; border: none; }
+        .edit-btn { background: #3b82f6; color: white; }
+        .delete-btn { background: #ef4444; color: white; }
+        .action-btn:hover { transform: scale(1.08); }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal.show { display: flex; }
+        .modal-content { background: white; border-radius: 20px; padding: 30px; max-width: 600px; width: 90%; max-height: 85vh; overflow-y: auto; }
+        #loginOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f8fafc; z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        #adminContent { display: none; }
+        .tab-content { display: none; }
+        .tab-content.show { display: block; }
+        .thumbnail { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; }
+    </style>
+</head>
+<body class="bg-slate-50 p-4 md:p-8">
+
+    <!-- Login Section -->
+    <div id="loginOverlay">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-sky-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-4">DAE</div>
+                <h2 class="text-2xl font-black text-slate-800">Admin Login</h2>
+                <p class="text-slate-500 text-sm mt-2">စီမံခန့်ခွဲသူများသာ ဝင်ရောက်နိုင်ပါသည်</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">အီးမေးလ် (Email)</label>
+                    <input type="email" id="loginEmail" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">လျှို့ဝှက်နံပါတ် (Password)</label>
+                    <input type="password" id="loginPassword" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm font-bold">
+                </div>
+                <button onclick="handleLogin()" id="loginBtn" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-black py-4 rounded-2xl transition shadow-lg shadow-sky-200">ဝင်ရောက်မည်</button>
+                <p id="loginError" class="text-red-500 text-xs text-center font-bold mt-2"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Admin Content -->
+    <div id="adminContent" class="max-w-6xl mx-auto">
+        <!-- Header & Nav -->
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-sky-600 rounded-2xl flex items-center justify-center text-white font-black text-xl">DAE</div>
+                <h1 class="text-xl font-black text-slate-800 uppercase">Admin Control Panel</h1>
+            </div>
+            <div class="flex flex-wrap gap-2 justify-center items-center">
+                <button onclick="showTab('news-tab')" class="tab-btn active px-5 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-sm">သတင်းများ</button>
+                <button onclick="showTab('programs-tab')" class="tab-btn px-5 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-sm">လုပ်ငန်းစဉ်များ</button>
+                <button onclick="showTab('social-tab')" class="tab-btn px-5 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 font-bold text-sm">Settings</button>
+                <button onclick="handleLogout()" class="px-5 py-2 rounded-xl bg-red-50 text-red-600 font-bold text-sm border border-red-100 ml-4">ထွက်မည်</button>
+            </div>
+        </div>
+
+        <!-- ၁။ သတင်းကဏ္ဍ -->
+        <div id="news-tab" class="tab-content show">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Add News Form -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border-t-8 border-emerald-500 sticky top-20">
+                        <h2 class="text-xl font-black text-slate-800 mb-6 flex items-center"><span class="w-2 h-8 bg-emerald-500 rounded mr-3"></span>သတင်းအသစ်တင်ရန်</h2>
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">သတင်းခေါင်းစဉ်</label>
+                                <input type="text" id="nT" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">သတင်းအကြောင်းအရာ</label>
+                                <textarea id="nD" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl h-32 outline-none text-sm leading-relaxed"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">ရက်စွဲ</label>
+                                <input type="text" id="nDa" placeholder="ဥပမာ - ၂၄ မတ် ၂၀၂၆" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm">
+                            </div>
+                            <div class="p-5 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                                <p class="text-xs font-bold text-slate-500 mb-4 uppercase">သတင်းဓာတ်ပုံများ</p>
+                                <div id="newsImagesList" class="flex flex-wrap gap-3 mb-4"></div>
+                                <label id="newsImgLabel" class="block w-full text-center bg-emerald-50 hover:bg-emerald-100 text-emerald-700 p-4 rounded-2xl cursor-pointer text-xs font-black transition border border-emerald-200">📸 ဓာတ်ပုံများ ရွေးချယ်ရန်</label>
+                                <input type="file" id="newsImg" multiple accept="image/*" style="display:none;" onchange="handleNewsImageSelect(event)">
+                            </div>
+                            <button onclick="addNews()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl transition shadow-lg shadow-emerald-200">သတင်းတင်မည်</button>
+                            <div id="newsStatus" class="status-msg"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- News List -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border-t-8 border-blue-500">
+                        <h2 class="text-xl font-black text-slate-800 mb-6 flex items-center"><span class="w-2 h-8 bg-blue-500 rounded mr-3"></span>တင်ထားသည့်သတင်းများ</h2>
+                        <div id="newsList" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ၂။ လုပ်ငန်းစဉ်များ ကဏ္ဍ -->
+        <div id="programs-tab" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Add/Edit Program Form -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border-t-8 border-indigo-500 sticky top-20">
+                        <h2 class="text-xl font-black text-slate-800 mb-6 flex items-center"><span class="w-2 h-8 bg-indigo-500 rounded mr-3"></span>လုပ်ငန်းစဉ် ပြင်ဆင်ရန်</h2>
+                        <div class="space-y-5">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">လုပ်ငန်းစဉ်အမည်</label>
+                                <select id="pType" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm font-bold">
+                                    <option value="">ရွေးချယ်ပါ</option>
+                                    <option value="literacy">Literacy - စာတတ်မြောက်ရေး</option>
+                                    <option value="nfpe">NFPE - ကျောင်းပြင်ပမူလတန်းပညာရေး</option>
+                                    <option value="nfme">NFME - ကျောင်းပြင်ပအလယ်တန်းပညာရေး</option>
+                                    <option value="ce">CE - စဉ်ဆက်ပညာရေး</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">အကျဉ်းချုပ် ဖော်ပြချက်</label>
+                                <textarea id="pDesc" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl h-24 outline-none text-sm leading-relaxed"></textarea>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 mb-2">အသေးစိတ် အချက်အလက်</label>
+                                <textarea id="pDetail" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl h-32 outline-none text-sm leading-relaxed"></textarea>
+                            </div>
+                            <div class="p-5 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                                <p class="text-xs font-bold text-slate-500 mb-4 uppercase">မှတ်တမ်းဓာတ်ပုံများ</p>
+                                <div id="programImagesList" class="flex flex-wrap gap-3 mb-4"></div>
+                                <label id="programImgLabel" class="block w-full text-center bg-indigo-50 hover:bg-indigo-100 text-indigo-700 p-4 rounded-2xl cursor-pointer text-xs font-black transition border border-indigo-200">📸 ဓာတ်ပုံများ ရွေးချယ်ရန်</label>
+                                <input type="file" id="programImg" multiple accept="image/*" style="display:none;" onchange="handleProgramImageSelect(event)">
+                            </div>
+                            <button onclick="saveProgram()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-2xl transition shadow-lg shadow-indigo-200">သိမ်းဆည်းမည်</button>
+                            <div id="programStatus" class="status-msg"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Programs List -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white p-8 rounded-3xl shadow-xl border-t-8 border-indigo-500">
+                        <h2 class="text-xl font-black text-slate-800 mb-6 flex items-center"><span class="w-2 h-8 bg-indigo-500 rounded mr-3"></span>လုပ်ငန်းစဉ်များ</h2>
+                        <div id="programsList" class="space-y-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ၃။ Settings ကဏ္ဍ -->
+        <div id="social-tab" class="tab-content">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border-t-8 border-purple-500">
+                <h2 class="text-xl font-black text-slate-800 mb-6 flex items-center"><span class="w-2 h-8 bg-purple-500 rounded mr-3"></span>Social Media Settings</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-2">Facebook Link</label>
+                        <input type="url" id="fbLink" placeholder="https://facebook.com/..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-2">Telegram Link</label>
+                        <input type="url" id="tgLink" placeholder="https://t.me/..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-2">TikTok Link</label>
+                        <input type="url" id="ttLink" placeholder="https://tiktok.com/..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-2">YouTube Link</label>
+                        <input type="url" id="ytLink" placeholder="https://youtube.com/..." class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm">
+                    </div>
+                </div>
+                <button onclick="saveSocialSettings()" class="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-black py-4 px-8 rounded-2xl transition shadow-lg shadow-purple-200">သိမ်းဆည်းမည်</button>
+                <div id="socialStatus" class="status-msg mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyBoEpxAm2L_AeG8BkqUd-bMawj6-SNqt3Q", authDomain: "dae-web-portal.firebaseapp.com", projectId: "dae-web-portal", storageBucket: "dae-web-portal.firebasestorage.app", messagingSenderId: "675669637539", appId: "1:675669637539:web:5ad6d6dd5b990cbee18216" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        let newsImages = [];
+        let programImages = [];
+
+        window.handleLogin = async () => {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                loadNews();
+                loadPrograms();
+                loadSocialSettings();
+            } catch (e) {
+                document.getElementById('loginError').textContent = 'အီးမေးလ် သို့မဟုတ် လျှို့ဝှက်နံပါတ် မှားနေပါသည်';
+            }
+        };
+
+        window.handleLogout = async () => {
+            await signOut(auth);
+            location.reload();
+        };
+
+        window.showTab = (tabName) => {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('show'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('show');
+            event.target.classList.add('active');
+        };
+
+        // News Management
+        window.handleNewsImageSelect = (e) => {
+            newsImages = Array.from(e.target.files);
+            updateNewsImagePreview();
+        };
+
+        const updateNewsImagePreview = () => {
+            const list = document.getElementById('newsImagesList');
+            list.innerHTML = newsImages.map((img, i) => `
+                <div class="image-preview">
+                    <img src="${URL.createObjectURL(img)}">
+                    <div class="remove-img" onclick="removeNewsImage(${i})">✕</div>
+                </div>
+            `).join('');
+        };
+
+        window.removeNewsImage = (i) => {
+            newsImages.splice(i, 1);
+            updateNewsImagePreview();
+        };
+
+        window.addNews = async () => {
+            const title = document.getElementById('nT').value;
+            const desc = document.getElementById('nD').value;
+            const date = document.getElementById('nDa').value;
+
+            if (!title || !desc) {
+                document.getElementById('newsStatus').innerHTML = '<span class="error-text">ခေါင်းစဉ်နှင့် အကြောင်းအရာ ဖြည့်သွင်းပါ</span>';
+                return;
+            }
+
+            const imgUrls = [];
+            for (let img of newsImages) {
+                const storageRef = ref(storage, `news/${Date.now()}_${img.name}`);
+                await uploadBytes(storageRef, img);
+                imgUrls.push(await getDownloadURL(storageRef));
+            }
+
+            await addDoc(collection(db, 'news'), { title, desc, date: date || new Date().toLocaleDateString('my-MM'), images: imgUrls, createdAt: new Date() });
+            document.getElementById('nT').value = '';
+            document.getElementById('nD').value = '';
+            document.getElementById('nDa').value = '';
+            newsImages = [];
+            updateNewsImagePreview();
+            document.getElementById('newsStatus').innerHTML = '<span class="success-text">✓ သတင်းတင်ခြင်း အောင်မြင်ပါသည်</span>';
+            loadNews();
+        };
+
+        const loadNews = async () => {
+            const snapshot = await getDocs(collection(db, 'news'));
+            const list = document.getElementById('newsList');
+            list.innerHTML = snapshot.docs.map(doc => `
+                <div class="item">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h4 class="font-black text-slate-800">${doc.data().title}</h4>
+                            <p class="text-xs text-slate-500 mt-1">${doc.data().date}</p>
+                            <p class="text-sm text-slate-600 mt-2">${doc.data().desc.substring(0, 100)}...</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="deleteNews('${doc.id}')" class="action-btn delete-btn">ဖျက်</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        window.deleteNews = async (id) => {
+            if (confirm('ဖျက်ခြင်းကို အတည်ပြုပါသည်လား?')) {
+                await deleteDoc(doc(db, 'news', id));
+                loadNews();
+            }
+        };
+
+        // Programs Management
+        window.handleProgramImageSelect = (e) => {
+            programImages = Array.from(e.target.files);
+            updateProgramImagePreview();
+        };
+
+        const updateProgramImagePreview = () => {
+            const list = document.getElementById('programImagesList');
+            list.innerHTML = programImages.map((img, i) => `
+                <div class="image-preview">
+                    <img src="${URL.createObjectURL(img)}">
+                    <div class="remove-img" onclick="removeProgramImage(${i})">✕</div>
+                </div>
+            `).join('');
+        };
+
+        window.removeProgramImage = (i) => {
+            programImages.splice(i, 1);
+            updateProgramImagePreview();
+        };
+
+        window.saveProgram = async () => {
+            const type = document.getElementById('pType').value;
+            const desc = document.getElementById('pDesc').value;
+            const detail = document.getElementById('pDetail').value;
+
+            if (!type || !desc) {
+                document.getElementById('programStatus').innerHTML = '<span class="error-text">လုပ်ငန်းစဉ်နှင့် ဖော်ပြချက် ရွေးချယ်ပါ</span>';
+                return;
+            }
+
+            const imgUrls = [];
+            for (let img of programImages) {
+                const storageRef = ref(storage, `programs/${type}/${Date.now()}_${img.name}`);
+                await uploadBytes(storageRef, img);
+                imgUrls.push(await getDownloadURL(storageRef));
+            }
+
+            await setDoc(doc(db, 'programs', type), { type, desc, detail, images: imgUrls, updatedAt: new Date() });
+            document.getElementById('pType').value = '';
+            document.getElementById('pDesc').value = '';
+            document.getElementById('pDetail').value = '';
+            programImages = [];
+            updateProgramImagePreview();
+            document.getElementById('programStatus').innerHTML = '<span class="success-text">✓ သိမ်းဆည်းခြင်း အောင်မြင်ပါသည်</span>';
+            loadPrograms();
+        };
+
+        const loadPrograms = async () => {
+            const snapshot = await getDocs(collection(db, 'programs'));
+            const list = document.getElementById('programsList');
+            const typeNames = { literacy: 'Literacy - စာတတ်မြောက်ရေး', nfpe: 'NFPE - ကျောင်းပြင်ပမူလတန်းပညာရေး', nfme: 'NFME - ကျောင်းပြင်ပအလယ်တန်းပညာရေး', ce: 'CE - စဉ်ဆက်ပညာရေး' };
+            list.innerHTML = snapshot.docs.map(doc => `
+                <div class="item">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h4 class="font-black text-slate-800">${typeNames[doc.data().type] || doc.data().type}</h4>
+                            <p class="text-sm text-slate-600 mt-2">${doc.data().desc}</p>
+                            <div class="flex flex-wrap gap-2 mt-3">${doc.data().images?.map(img => `<img src="${img}" class="thumbnail">`).join('') || 'ဓာတ်ပုံမရှိ'}</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        };
+
+        // Social Settings
+        const loadSocialSettings = async () => {
+            const doc = await getDocs(collection(db, 'settings'));
+            if (doc.docs.length > 0) {
+                const data = doc.docs[0].data();
+                document.getElementById('fbLink').value = data.facebook || '';
+                document.getElementById('tgLink').value = data.telegram || '';
+                document.getElementById('ttLink').value = data.tiktok || '';
+                document.getElementById('ytLink').value = data.youtube || '';
+            }
+        };
+
+        window.saveSocialSettings = async () => {
+            await setDoc(doc(db, 'settings', 'social'), {
+                facebook: document.getElementById('fbLink').value,
+                telegram: document.getElementById('tgLink').value,
+                tiktok: document.getElementById('ttLink').value,
+                youtube: document.getElementById('ytLink').value
+            });
+            document.getElementById('socialStatus').innerHTML = '<span class="success-text">✓ သိမ်းဆည်းခြင်း အောင်မြင်ပါသည်</span>';
+        };
+    </script>
+</body>
+</html>
